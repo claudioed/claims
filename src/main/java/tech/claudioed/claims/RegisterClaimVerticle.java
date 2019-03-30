@@ -1,6 +1,7 @@
 package tech.claudioed.claims;
 
 import io.nats.client.Connection;
+import io.nats.client.Dispatcher;
 import io.nats.client.Nats;
 import io.nats.client.Options;
 import io.vertx.core.AbstractVerticle;
@@ -45,21 +46,21 @@ public class RegisterClaimVerticle extends AbstractVerticle {
       .connectionListener((conn, type) -> LOGGER.info("Status change " + type))
     .build());
     final MongoClient mongoClient = MongoClient.createShared(this.vertx, mongoConfig);
-    natsConnection.createDispatcher((message ) -> {
-      LOGGER.info(" Receiving message {} ",new String(message.getData(), StandardCharsets.UTF_8));
+    natsConnection.flush(Duration.ZERO);
+    final Dispatcher dispatcher = natsConnection.createDispatcher((message) -> {
+      LOGGER.info(" Receiving message {} ", new String(message.getData(), StandardCharsets.UTF_8));
       final ClaimRequest claimRequest = Json
         .decodeValue(new String(message.getData(), StandardCharsets.UTF_8), ClaimRequest.class);
       final Claim claim = Claim.from(claimRequest);
-      mongoClient.insert("claims",claim.json(),res ->{
-        if(res.succeeded()){
+      mongoClient.insert("claims", claim.json(), res -> {
+        if (res.succeeded()) {
           LOGGER.info("claims registered successfully !!!");
-        }else{
+        } else {
           LOGGER.error("Error to insert in database !!");
         }
       });
     });
-    natsConnection.subscribe("request-claims");
-    natsConnection.flush(Duration.ZERO);
+    dispatcher.subscribe("request-claims");
   }
 
 }
