@@ -10,6 +10,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.mongo.MongoClient;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import lombok.SneakyThrows;
 
 /**
@@ -33,7 +34,16 @@ public class RegisterClaimVerticle extends AbstractVerticle {
     JsonObject mongoConfig = new JsonObject()
       .put("connection_string", mongoHost)
       .put("db_name", "CLAIMS");
-    Connection natsConnection = Nats.connect(new Options.Builder().userInfo(natsUser,natsPass).server(natsHost).build());
+    Connection natsConnection = Nats.connect(new Options.Builder()
+      .connectionTimeout(Duration.ofSeconds(2))
+      .pingInterval(Duration.ofSeconds(10))
+      .reconnectWait(Duration.ofSeconds(1))
+      .userInfo(natsUser,natsPass)
+      .maxReconnects(-1)
+      .reconnectBufferSize(-1)
+      .server(natsHost)
+      .connectionListener((conn, type) -> LOGGER.info("Status change " + type))
+    .build());
     final MongoClient mongoClient = MongoClient.createShared(this.vertx, mongoConfig);
     natsConnection.createDispatcher((message ) -> {
       LOGGER.info(" Receiving message {} ",new String(message.getData(), StandardCharsets.UTF_8));
@@ -49,6 +59,7 @@ public class RegisterClaimVerticle extends AbstractVerticle {
       });
     });
     natsConnection.subscribe("request-claims");
+    natsConnection.flush(Duration.ZERO);
   }
 
 }
