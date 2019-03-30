@@ -30,11 +30,15 @@ public class RegisterClaimVerticle extends AbstractVerticle {
     final String natsPass = System.getenv("NATS_PASS");
     final String mongoHost = System.getenv("MONGO_HOST");
 
-    LOGGER.info(" NATS HOST " + natsHost);
     LOGGER.info(" MONGO HOST " + mongoHost);
+    LOGGER.info(" NATS HOST " + natsHost);
+
     JsonObject mongoConfig = new JsonObject()
       .put("connection_string", mongoHost)
       .put("db_name", "CLAIMS");
+
+    final MongoClient mongoClient = MongoClient.createShared(this.vertx, mongoConfig);
+
     Connection natsConnection = Nats.connect(new Options.Builder()
       .connectionTimeout(Duration.ofSeconds(2))
       .pingInterval(Duration.ofSeconds(10))
@@ -45,12 +49,12 @@ public class RegisterClaimVerticle extends AbstractVerticle {
       .server(natsHost)
       .connectionListener((conn, type) -> LOGGER.info("Status change " + type))
     .build());
-    final MongoClient mongoClient = MongoClient.createShared(this.vertx, mongoConfig);
-    natsConnection.flush(Duration.ZERO);
+
     final Dispatcher dispatcher = natsConnection.createDispatcher((message) -> {
-      LOGGER.info(" Receiving message {} ", new String(message.getData(), StandardCharsets.UTF_8));
+      LOGGER.info(" Receiving message " + new String(message.getData(), StandardCharsets.UTF_8));
       final ClaimRequest claimRequest = Json
         .decodeValue(new String(message.getData(), StandardCharsets.UTF_8), ClaimRequest.class);
+      LOGGER.info(" Decoding executed successfully " + claimRequest.toString());
       final Claim claim = Claim.from(claimRequest);
       mongoClient.insert("claims", claim.json(), res -> {
         if (res.succeeded()) {

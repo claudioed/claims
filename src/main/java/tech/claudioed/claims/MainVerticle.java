@@ -20,6 +20,7 @@ public class MainVerticle extends AbstractVerticle {
     this.vertx.deployVerticle(new RegisterClaimVerticle(),deploymentOptions);
     this.vertx.deployVerticle(new FindClaimByOrderIdVerticle(),deploymentOptions);
     this.vertx.deployVerticle(new FindClaimVerticle(),deploymentOptions);
+    this.vertx.deployVerticle(new CreateDatabaseClaimsVerticle(),deploymentOptions);
     HealthCheckHandler healthChecks = HealthCheckHandler.create(vertx);
     Router router = Router.router(vertx);
     router.get("/health").handler(healthChecks);
