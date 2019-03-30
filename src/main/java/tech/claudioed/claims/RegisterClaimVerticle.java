@@ -51,9 +51,10 @@ public class RegisterClaimVerticle extends AbstractVerticle {
     .build());
 
     final Dispatcher dispatcher = natsConnection.createDispatcher((message) -> {
-      LOGGER.info(" Receiving message " + new String(message.getData(), StandardCharsets.UTF_8));
+      final String response = new String(message.getData(), StandardCharsets.UTF_8);
+      LOGGER.info(" Receiving message " + response );
       final ClaimRequest claimRequest = Json
-        .decodeValue(new String(message.getData(), StandardCharsets.UTF_8), ClaimRequest.class);
+        .decodeValue(response, ClaimRequest.class);
       LOGGER.info(" Decoding executed successfully " + claimRequest.toString());
       final Claim claim = Claim.from(claimRequest);
       mongoClient.insert("claims", claim.json(), res -> {
