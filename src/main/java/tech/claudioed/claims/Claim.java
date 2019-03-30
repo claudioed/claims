@@ -1,5 +1,6 @@
 package tech.claudioed.claims;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.vertx.core.json.JsonObject;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -16,9 +17,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Claim {
 
+  @JsonProperty("_id")
   private String id;
 
   private String orderId;
+
+  private String customerId;
 
   private LocalDateTime registeredAt;
 
@@ -28,6 +32,7 @@ public class Claim {
     final JsonObject json = new JsonObject();
     return json.put("_id", this.id)
         .put("orderId",this.orderId)
+        .put("customerId",this.customerId)
         .put("registeredAt", this.registeredAt.toString())
         .put("data", this.data);
   }
@@ -36,6 +41,7 @@ public class Claim {
     return Claim.builder()
         .id(UUID.randomUUID().toString())
         .orderId(request.getOrderId())
+        .customerId(request.getCustomerId())
         .registeredAt(LocalDateTime.now())
         .data(request.getData())
         .build();

@@ -20,6 +20,8 @@ public class ClaimRequest {
 
   private String orderId;
 
+  private String customerId;
+
   private Map<String, Object> data;
 
 }

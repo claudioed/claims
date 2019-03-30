@@ -54,8 +54,6 @@ public class RegisterClaimVerticle extends AbstractVerticle {
     final Dispatcher dispatcher = natsConnection.createDispatcher((message) -> {
       final String response = new String(message.getData(), StandardCharsets.UTF_8);
       LOGGER.info(" Receiving message " + response );
-      final JsonObject jsonObject = new JsonObject(response);
-      LOGGER.info(" JSON " + jsonObject.toString() );
       final ClaimRequest claimRequest = Json.decodeValue(response, ClaimRequest.class);
       LOGGER.info(" Decoding executed successfully " + claimRequest.toString());
       final Claim claim = Claim.from(claimRequest);
