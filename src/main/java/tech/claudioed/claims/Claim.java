@@ -18,6 +18,8 @@ public class Claim {
 
   private String id;
 
+  private String orderId;
+
   private LocalDateTime registeredAt;
 
   private Map<String, Object> data;
@@ -25,6 +27,7 @@ public class Claim {
   public JsonObject json() {
     final JsonObject json = new JsonObject();
     return json.put("_id", this.id)
+        .put("orderId",this.orderId)
         .put("registeredAt", this.registeredAt.toString())
         .put("data", this.data);
   }
@@ -32,6 +35,7 @@ public class Claim {
   public static Claim from(ClaimRequest request) {
     return Claim.builder()
         .id(UUID.randomUUID().toString())
+        .orderId(request.getOrderId())
         .registeredAt(LocalDateTime.now())
         .data(request.getData())
         .build();

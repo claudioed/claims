@@ -12,6 +12,8 @@ public class ClaimRequest {
 
   private String type;
 
+  private String orderId;
+
   private Map<String, Object> data;
 
 }
