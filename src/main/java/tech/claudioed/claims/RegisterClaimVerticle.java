@@ -47,6 +47,7 @@ public class RegisterClaimVerticle extends AbstractVerticle {
       .maxReconnects(-1)
       .reconnectBufferSize(-1)
       .server(natsHost)
+      .connectionName(System.getenv("HOSTNAME"))
       .connectionListener((conn, type) -> LOGGER.info("Status change " + type))
     .build());
 
